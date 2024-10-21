@@ -1,0 +1,132 @@
+
+TABLE SCHEMA
+
+CREATE TABLE Categories (
+    CategoryId INT AUTO_INCREMENT PRIMARY KEY,
+    CategoryName VARCHAR(255) NOT NULL
+);
+
+ 
+CREATE TABLE Products (
+    ProductId INT AUTO_INCREMENT PRIMARY KEY,
+    ProductName VARCHAR(255) NOT NULL,
+    CategoryId INT,
+    FOREIGN KEY (CategoryId) REFERENCES Categories(CategoryId)
+);
+
+
+STORED PROCEDURES
+
+CREATE PROCEDURE `AddCategory`(
+    IN p_CategoryName VARCHAR(255)
+)
+BEGIN
+    INSERT INTO Categories (CategoryName) VALUES (p_CategoryName);
+END
+
+CREATE  PROCEDURE `DeleteCategory`(
+    IN p_CategoryId INT
+)
+BEGIN
+    DELETE FROM Categories
+    WHERE CategoryId = p_CategoryId;
+END
+
+CREATE  PROCEDURE `GetCategories`()
+BEGIN
+    SELECT * FROM Categories;
+END
+
+CREATE  PROCEDURE `GetCategoryId`(
+    IN Category_Id INT 
+)
+BEGIN
+    SELECT * 
+    FROM categories 
+    WHERE CategoryId = Category_Id; 
+END
+
+
+
+
+CREATE  PROCEDURE `AddProduct`(
+    IN p_ProductName VARCHAR(255),
+    IN p_CategoryId INT
+)
+BEGIN
+    INSERT INTO Products (ProductName, CategoryId) VALUES (p_ProductName, p_CategoryId);
+END
+
+
+CREATE  PROCEDURE `DeleteProduct`(
+    IN p_ProductId INT
+)
+BEGIN
+    DELETE FROM Products
+    WHERE ProductId = p_ProductId;
+END
+
+
+CREATE  PROCEDURE `UpdateCategory`(
+    IN p_CategoryId INT,
+    IN p_CategoryName VARCHAR(255)
+)
+BEGIN
+    UPDATE Categories
+    SET CategoryName = p_CategoryName
+    WHERE CategoryId = p_CategoryId;
+END
+
+
+CREATE  PROCEDURE `GetProductId`(
+    IN Product_Id INT 
+)
+BEGIN
+    SELECT * 
+    FROM products ps
+    join categories c on c.CategoryId=ps.CategoryId
+    WHERE  ps.ProductId =Product_Id ; 
+END
+
+
+CREATE  PROCEDURE `GetProducts`(
+    IN searchKeyword VARCHAR(255),
+    IN sortOrder VARCHAR(4),
+    IN page INT,
+    IN pageSize INT
+)
+BEGIN
+    DECLARE skips INT;
+    SET skips = (page - 1) * pageSize;
+
+    IF sortOrder = 'ASC' THEN
+        SELECT P.ProductId, P.ProductName,C.CategoryName
+        FROM Products P
+        JOIN categories C ON P.CategoryId = C.CategoryId
+        WHERE P.ProductName LIKE CONCAT('%', searchKeyword, '%')
+        ORDER BY P.ProductName ASC
+        LIMIT pageSize OFFSET skips;
+
+    ELSE
+        SELECT P.ProductId, P.ProductName,C.CategoryName
+        FROM Products P
+        JOIN categories C ON P.CategoryId = C.CategoryId
+        WHERE P.ProductName LIKE CONCAT('%', searchKeyword, '%')
+        ORDER BY P.ProductName DESC
+        LIMIT pageSize OFFSET skips;
+    END IF;
+
+END
+
+
+
+CREATE  PROCEDURE `UpdateProduct`(
+    IN p_ProductId INT,
+    IN p_ProductName VARCHAR(255),
+    IN p_CategoryId INT
+)
+BEGIN
+    UPDATE Products
+    SET ProductName = p_ProductName, CategoryId = p_CategoryId
+    WHERE ProductId = p_ProductId;
+END
